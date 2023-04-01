@@ -1,0 +1,74 @@
+//nomination des variables
+import processing.pdf.*;
+PGraphicsPDF pdf;
+
+PImage img;
+
+int sym = 12; //sym pour symétrie
+int angle = 360 / sym;
+int nbreDePage=10; //ici on peut modifier le nombre d'images
+boolean record=false;
+
+void setup() {
+  size(1192, 1192); //dimensions d'une page A4
+  //angleMode(DEGREES);
+  background(0);
+  //background(img); //tentative de mettre une image en bg , turbo fail
+  //img= loadImage("rainbow.jpg");
+  translate(width/2, height/2); //placer au milieu
+  //stroke(255,0, 0); //Me permet de poser mon "cadre" lors de la création de mon hexagone
+  int angle = 360/sym;
+  for (int i = 0; i< sym; i++) {
+    rotate(angle);
+    line(0, 0, width, 0);
+  }
+  pdf = (PGraphicsPDF)beginRecord(PDF, "RandomBook_"+int(random(99999))+"_.pdf");
+  beginRecord(pdf);
+}
+
+void draw() {
+  translate(width/2, height/2); //placer au milieu
+
+  //création de variables pour la souris
+  int mx = mouseX - width/2;
+  int my = mouseY - height/2;
+  int pmx = pmouseX - width/2;
+  int pmy = pmouseY - height/2;
+
+  //lorsqu'on maintient la souris
+  if (mousePressed) {
+    record=true;
+    stroke(255,100);
+    int angle = 360/12;
+    for (int i = 0; i <12; i++) {
+      push();
+
+      //for(int i = 0; i < sym; i++) { //rotation 12 fois
+      rotate(i*angle); //rotation de 60 degrés qu'on tourne 6 fois pour faire un hexagone
+      if (i % 2 == 1 ) { //1 et non pas 0 pour calibrer mon curseur au trait
+        scale(-1, 1);
+      }
+
+      float d = dist(mx, my, pmx, pmy); //pression pinceau
+      float pression = map(d, 0, 20, 20, 1);
+
+      pression=constrain(pression, 0, 20); //contrain = contraindre entre deux val
+      strokeWeight(pression);
+      //strokeWeight(20);
+      line(mx, my, pmx, pmy);
+      pop();
+    }
+  } else {
+    if (record==true) {
+      pdf.nextPage();
+      //background(random(8,40));
+      background(0);
+      nbreDePage--;
+      if (nbreDePage<=0) {
+        endRecord();
+        exit();  // Quit
+      }
+      record=false;
+    }
+  }
+}
